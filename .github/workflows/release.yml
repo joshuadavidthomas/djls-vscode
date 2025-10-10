@@ -36,6 +36,9 @@ jobs:
       - name: Publish to VS Marketplace
         run: bunx @vscode/vsce publish --packagePath *.vsix --pat ${{ secrets.VSCE_PAT }}
 
+      - name: Publish to Open VSX Registry
+        run: bunx ovsx publish --packagePath *.vsix --pat ${{ secrets.OVSX_PAT }}
+
       - name: Upload VSIX to GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
