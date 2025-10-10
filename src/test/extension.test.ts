@@ -4,14 +4,14 @@ import * as vscode from "vscode";
 suite("Extension Test Suite", () => {
 	test("Extension is present", () => {
 		const extension = vscode.extensions.getExtension(
-			"joshuadavidthomas.django-language-server",
+			"djls.django-language-server",
 		);
 		assert.ok(extension);
 	});
 
 	test("Extension activates", async () => {
 		const extension = vscode.extensions.getExtension(
-			"joshuadavidthomas.django-language-server",
+			"djls.django-language-server",
 		);
 		assert.ok(extension);
 
