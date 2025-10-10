@@ -1,0 +1,141 @@
+{
+	"name": "django-language-server",
+	"displayName": "Django Language Server",
+	"description": "Visual Studio Code client for django-language-server",
+	"version": "0.1.0",
+	"publisher": "joshuadavidthomas",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/joshuadavidthomas/djls-vscode"
+	},
+	"license": "Apache-2.0",
+	"keywords": [
+		"django",
+		"python",
+		"language-server",
+		"lsp"
+	],
+	"engines": {
+		"vscode": "^1.103.0"
+	},
+	"categories": [
+		"Programming Languages"
+	],
+	"activationEvents": [
+		"onLanguage:python",
+		"onLanguage:django-html",
+		"workspaceContains:**/manage.py"
+	],
+	"main": "./dist/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "djls.restart",
+				"title": "Django Language Server: Restart"
+			},
+			{
+				"command": "djls.status",
+				"title": "Django Language Server: Show Status"
+			}
+		],
+		"configuration": {
+			"type": "object",
+			"title": "Django Language Server",
+			"properties": {
+				"djls.serverPath": {
+					"type": "string",
+					"default": "djls",
+					"description": "Path to the Django Language Server executable. Can be 'djls' if installed globally, or a full path like '/usr/local/bin/djls' or 'python -m djls'."
+				},
+				"djls.serverArgs": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"default": [
+						"serve"
+					],
+					"description": "Arguments to pass to the Django Language Server command."
+				},
+				"djls.trace.server": {
+					"type": "string",
+					"enum": [
+						"off",
+						"messages",
+						"verbose"
+					],
+					"default": "off",
+					"description": "Traces the communication between VS Code and the Django Language Server."
+				},
+				"djls.djangoSettingsModule": {
+					"type": "string",
+					"default": "",
+					"description": "Django settings module (e.g., 'myproject.settings'). If not set, uses DJANGO_SETTINGS_MODULE environment variable."
+				},
+				"djls.venvPath": {
+					"type": "string",
+					"default": "",
+					"description": "Absolute path to your virtual environment directory. If not set, auto-detects .venv, venv, env, .env, or VIRTUAL_ENV."
+				},
+				"djls.pythonPath": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"default": [],
+					"description": "Additional Python paths to include in sys.path. Useful for custom module locations."
+				},
+				"djls.debug": {
+					"type": "boolean",
+					"default": false,
+					"description": "Enable debug logging for troubleshooting language server issues."
+				}
+			}
+		},
+		"languages": [
+			{
+				"id": "django-html",
+				"aliases": [
+					"Django HTML",
+					"Django Template"
+				],
+				"extensions": [
+					".djhtml",
+					".dj.html",
+					".dj.txt",
+					".dj.md"
+				],
+				"filenames": []
+			}
+		]
+	},
+	"scripts": {
+		"vscode:prepublish": "bun run package",
+		"compile": "bun run check-types && bun run lint && node esbuild.js",
+		"watch": "npm-run-all -p watch:*",
+		"watch:esbuild": "node esbuild.js --watch",
+		"watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+		"package": "bun run check-types && bun run lint && node esbuild.js --production",
+		"compile-tests": "tsc -p . --outDir out",
+		"watch-tests": "tsc -p . -w --outDir out",
+		"pretest": "bun run compile-tests && bun run compile && bun run lint",
+		"check-types": "tsc --noEmit",
+		"format": "biome check --write src",
+		"lint": "biome check src",
+		"test": "vscode-test"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.2.5",
+		"@types/mocha": "^10.0.10",
+		"@types/node": "22.x",
+		"@types/vscode": "^1.103.0",
+		"@vscode/test-cli": "^0.0.11",
+		"@vscode/test-electron": "^2.5.2",
+		"esbuild": "^0.25.8",
+		"npm-run-all": "^4.1.5",
+		"typescript": "^5.9.2"
+	},
+	"dependencies": {
+		"vscode-languageclient": "^9.0.1"
+	}
+}
