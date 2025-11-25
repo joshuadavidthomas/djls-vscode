@@ -20,12 +20,12 @@ jobs:
   pre-commit:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
 
       - name: Install uv
-        uses: astral-sh/setup-uv@3259c6206f993105e3a61b142c2d97bf4b9ef83d
+        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244
         with:
           activate-environment: true
           enable-cache: true
@@ -52,7 +52,7 @@ jobs:
     outputs:
       ts: ${{ steps.filter.outputs.ts }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
 
@@ -73,7 +73,7 @@ jobs:
     needs: ts-changes
     if: needs.ts-changes.outputs.ts == 'true'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
 
@@ -92,7 +92,7 @@ jobs:
     needs: ts-changes
     if: needs.ts-changes.outputs.ts == 'true'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
 
