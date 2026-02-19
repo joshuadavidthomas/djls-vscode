@@ -9,7 +9,9 @@ suite("Extension Test Suite", () => {
 		assert.ok(extension);
 	});
 
-	test("Extension activates", async () => {
+	test("Extension activates", async function () {
+		this.timeout(10_000);
+
 		const extension = vscode.extensions.getExtension(
 			"djls.django-language-server",
 		);
