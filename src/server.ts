@@ -7,6 +7,7 @@ import {
 	LanguageClient,
 	type LanguageClientOptions,
 	type ServerOptions,
+	Trace,
 } from "vscode-languageclient/node";
 import type { ExtensionConfig } from "./config";
 import {
@@ -206,7 +207,9 @@ export async function startLanguageServer(
 	);
 
 	if (config.traceServer !== "off") {
-		client.setTrace(config.traceServer === "verbose" ? 2 : 1);
+		client.setTrace(
+			config.traceServer === "verbose" ? Trace.Verbose : Trace.Messages,
+		);
 	}
 
 	try {
