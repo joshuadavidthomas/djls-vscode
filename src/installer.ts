@@ -4,18 +4,12 @@ import * as https from "node:https";
 import * as path from "node:path";
 import { promisify } from "node:util";
 import type * as vscode from "vscode";
+import { DEFAULT_SERVER_BINARY } from "./config";
 
 const execFileAsync = promisify(execFile);
 
 const GITHUB_REPO = "joshuadavidthomas/django-language-server";
 const PACKAGE_NAME = "django-language-server";
-const EXECUTABLE_NAME = "djls";
-
-function getExecutableName(): string {
-	return process.platform === "win32"
-		? `${EXECUTABLE_NAME}.exe`
-		: EXECUTABLE_NAME;
-}
 
 interface GithubRelease {
 	tag_name: string;
@@ -148,7 +142,7 @@ async function fetchLatestRelease(): Promise<GithubRelease> {
 }
 
 export function getInstalledServerPath(storagePath: string): string {
-	return path.join(storagePath, "server", getExecutableName());
+	return path.join(storagePath, "server", DEFAULT_SERVER_BINARY);
 }
 
 export async function checkInstalledServer(
@@ -211,7 +205,7 @@ export async function installServer(
 	}
 
 	const extractedDir = path.join(storagePath, baseName);
-	const execName = getExecutableName();
+	const execName = DEFAULT_SERVER_BINARY;
 	const extractedBinary = path.join(extractedDir, execName);
 	const finalBinary = getInstalledServerPath(storagePath);
 

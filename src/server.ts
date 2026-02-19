@@ -9,7 +9,7 @@ import {
 	type ServerOptions,
 	Trace,
 } from "vscode-languageclient/node";
-import type { ExtensionConfig } from "./config";
+import { DEFAULT_SERVER_BINARY, type ExtensionConfig } from "./config";
 import {
 	checkInstalledServer,
 	getInstalledServerPath,
@@ -142,8 +142,7 @@ async function resolveServerPath(
 	}
 
 	// If the user explicitly configured a custom path, don't try auto-install
-	const defaultServer = process.platform === "win32" ? "djls.exe" : "djls";
-	const isDefaultPath = config.serverPath === defaultServer;
+	const isDefaultPath = config.serverPath === DEFAULT_SERVER_BINARY;
 
 	if (!isDefaultPath) {
 		outputChannel.appendLine(
