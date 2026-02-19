@@ -26,6 +26,10 @@ and this project attempts to adhere to [Semantic Versioning](https://semver.org/
 - Configuration options for server path and Django settings
 - Auto-install `djls` from GitHub releases when not found on PATH
 
+### Fixed
+
+- Fixed binary name default on Windows — the `serverPath` setting now correctly defaults to `djls.exe` on Windows and `djls` on POSIX systems
+
 ### New Contributors
 
 - Josh Thomas <josh@joshthomas.dev> (maintainer)
