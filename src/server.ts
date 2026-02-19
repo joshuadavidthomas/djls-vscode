@@ -142,7 +142,8 @@ async function resolveServerPath(
 	}
 
 	// If the user explicitly configured a custom path, don't try auto-install
-	const isDefaultPath = config.serverPath === "djls";
+	const defaultServer = process.platform === "win32" ? "djls.exe" : "djls";
+	const isDefaultPath = config.serverPath === defaultServer;
 
 	if (!isDefaultPath) {
 		outputChannel.appendLine(
