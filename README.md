@@ -27,7 +27,6 @@ For configuring additional file types like `.html` files in templates directorie
 
 This extension contributes the following settings:
 
-* `djls.autoInstall`: Automatically download and install `djls` if it is not found on PATH (default: `true`)
 * `djls.serverPath`: Path to the Django Language Server executable (default: `"djls"`)
 * `djls.serverArgs`: Arguments to pass to the Django Language Server command (default: `["serve"]`)
 * `djls.djangoSettingsModule`: Django settings module, e.g., `myproject.settings` (default: `""`, uses `DJANGO_SETTINGS_MODULE` env var)

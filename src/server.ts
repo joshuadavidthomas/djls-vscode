@@ -135,40 +135,6 @@ async function resolveServerPath(
 		return installedPath;
 	}
 
-	// If auto-install is disabled, show manual installation guidance
-	if (!config.autoInstall) {
-		const message = `Django Language Server (djls) not found.
-
-Install via:
-  • Releases: https://github.com/joshuadavidthomas/django-language-server/releases
-  • pip: pip install django-language-server
-  • uv: uv tool install django-language-server
-
-Or configure a custom path in settings.`;
-		outputChannel.appendLine(message);
-		vscode.window
-			.showErrorMessage(
-				"Django Language Server (djls) not found.",
-				"Installation Guide",
-				"Open Settings",
-			)
-			.then((selection) => {
-				if (selection === "Installation Guide") {
-					vscode.env.openExternal(
-						vscode.Uri.parse(
-							"https://github.com/joshuadavidthomas/django-language-server/releases",
-						),
-					);
-				} else if (selection === "Open Settings") {
-					vscode.commands.executeCommand(
-						"workbench.action.openSettings",
-						"djls.serverPath",
-					);
-				}
-			});
-		return undefined;
-	}
-
 	// Offer to auto-install
 	const selection = await vscode.window.showInformationMessage(
 		"Django Language Server (djls) not found. Install it automatically?",

@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 
 export interface ExtensionConfig {
-	autoInstall: boolean;
 	serverPath: string;
 	serverArgs: string[];
 	djangoSettingsModule: string;
@@ -20,7 +19,6 @@ export function getExtensionConfig(): ExtensionConfig {
 	const defaultServer = process.platform === "win32" ? "djls.exe" : "djls";
 
 	return {
-		autoInstall: config.get<boolean>("autoInstall", true),
 		serverPath: config.get<string>("serverPath", defaultServer),
 		serverArgs: config.get<string[]>("serverArgs", ["serve"]),
 		djangoSettingsModule: config.get<string>("djangoSettingsModule", ""),
