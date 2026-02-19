@@ -5,6 +5,9 @@ updates:
     schedule:
       interval: weekly
       timezone: America/Chicago
+    cooldown:
+      default: 7
+      default-days: 7
     groups:
       bun:
         patterns:
@@ -14,6 +17,9 @@ updates:
     schedule:
       interval: weekly
       timezone: America/Chicago
+    cooldown:
+      default: 7
+      default-days: 7
     groups:
       gha:
         patterns:
