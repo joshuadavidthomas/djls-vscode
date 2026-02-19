@@ -39,9 +39,10 @@ function updateStatusBar(
 
 async function initializeLanguageServer(
 	output: vscode.OutputChannel,
+	storagePath: string,
 ): Promise<LanguageClient | undefined> {
 	const config = getExtensionConfig();
-	const languageClient = await startLanguageServer(output, config);
+	const languageClient = await startLanguageServer(output, config, storagePath);
 	return languageClient;
 }
 
@@ -91,6 +92,7 @@ function registerCommands(
 	getOutputChannel: () => vscode.OutputChannel,
 	getStatusBarItem: () => vscode.StatusBarItem,
 	setClient: (c: LanguageClient | undefined) => void,
+	storagePath: string,
 ): void {
 	const restartCommand = vscode.commands.registerCommand(
 		"djls.restart",
@@ -102,7 +104,10 @@ function registerCommands(
 			if (currentClient) {
 				await currentClient.stop();
 			}
-			const newClient = await initializeLanguageServer(getOutputChannel());
+			const newClient = await initializeLanguageServer(
+				getOutputChannel(),
+				storagePath,
+			);
 			setClient(newClient);
 			updateStatusBar(getStatusBarItem(), newClient);
 			vscode.window.showInformationMessage("Django Language Server restarted");
@@ -137,6 +142,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	);
 	outputChannel.appendLine("Django Language Server extension is now active!");
 
+	const storagePath = context.globalStorageUri.fsPath;
+
 	const statusBarItem = vscode.window.createStatusBarItem(
 		vscode.StatusBarAlignment.Right,
 		100,
@@ -152,6 +159,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		(c) => {
 			client = c;
 		},
+		storagePath,
 	);
 
 	vscode.workspace.onDidChangeConfiguration(
@@ -164,7 +172,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		context.subscriptions,
 	);
 
-	client = await initializeLanguageServer(outputChannel);
+	client = await initializeLanguageServer(outputChannel, storagePath);
 	updateStatusBar(statusBarItem, client);
 }
 

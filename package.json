@@ -42,6 +42,11 @@
 			"type": "object",
 			"title": "Django Language Server",
 			"properties": {
+				"djls.autoInstall": {
+					"type": "boolean",
+					"default": true,
+					"description": "Automatically download and install the Django Language Server if it is not found on PATH."
+				},
 				"djls.serverPath": {
 					"type": "string",
 					"default": "djls",
