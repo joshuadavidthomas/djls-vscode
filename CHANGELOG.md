@@ -24,6 +24,7 @@ and this project attempts to adhere to [Semantic Versioning](https://semver.org/
 - Basic language server integration
 - Support for Django templates and Python files
 - Configuration options for server path and Django settings
+- Auto-install `djls` from GitHub releases when not found on PATH
 
 ### New Contributors
 
