@@ -88,7 +88,7 @@ function registerCommands(
 	context: vscode.ExtensionContext,
 	getClient: () => LanguageClient | undefined,
 	outputChannel: vscode.OutputChannel,
-	getStatusBarItem: () => vscode.StatusBarItem,
+	statusBarItem: vscode.StatusBarItem,
 	setClient: (c: LanguageClient | undefined) => void,
 	storagePath: string,
 ): void {
@@ -107,8 +107,12 @@ function registerCommands(
 				storagePath,
 			);
 			setClient(newClient);
-			updateStatusBar(getStatusBarItem(), newClient);
-			vscode.window.showInformationMessage("Django Language Server restarted");
+			updateStatusBar(statusBarItem, newClient);
+			if (newClient) {
+				vscode.window.showInformationMessage(
+					"Django Language Server restarted",
+				);
+			}
 		},
 	);
 
@@ -153,7 +157,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		context,
 		() => client,
 		outputChannel,
-		() => statusBarItem,
+		statusBarItem,
 		(c) => {
 			client = c;
 		},
