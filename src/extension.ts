@@ -46,7 +46,7 @@ async function initializeLanguageServer(
 	return languageClient;
 }
 
-function handleStatusBarClick(): void {
+function handleStatusBarClick(outputChannel: vscode.OutputChannel): void {
 	const items: vscode.QuickPickItem[] = [
 		{
 			label: "$(gear) Configure Django Settings Module",
@@ -77,9 +77,7 @@ function handleStatusBarClick(): void {
 					"djls.djangoSettingsModule",
 				);
 			} else if (selection.label.includes("View Server Logs")) {
-				vscode.commands.executeCommand(
-					"workbench.action.output.show.extension-output-ms-python.vscode-pylance-#1-Django Language Server",
-				);
+				outputChannel.show();
 			} else if (selection.label.includes("Restart")) {
 				vscode.commands.executeCommand("djls.restart");
 			}
@@ -89,7 +87,7 @@ function handleStatusBarClick(): void {
 function registerCommands(
 	context: vscode.ExtensionContext,
 	getClient: () => LanguageClient | undefined,
-	getOutputChannel: () => vscode.OutputChannel,
+	outputChannel: vscode.OutputChannel,
 	getStatusBarItem: () => vscode.StatusBarItem,
 	setClient: (c: LanguageClient | undefined) => void,
 	storagePath: string,
@@ -105,7 +103,7 @@ function registerCommands(
 				await currentClient.stop();
 			}
 			const newClient = await initializeLanguageServer(
-				getOutputChannel(),
+				outputChannel,
 				storagePath,
 			);
 			setClient(newClient);
@@ -130,7 +128,7 @@ function registerCommands(
 
 	const showStatusCommand = vscode.commands.registerCommand(
 		"djls.showStatus",
-		handleStatusBarClick,
+		() => handleStatusBarClick(outputChannel),
 	);
 
 	context.subscriptions.push(restartCommand, statusCommand, showStatusCommand);
@@ -154,7 +152,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	registerCommands(
 		context,
 		() => client,
-		() => outputChannel,
+		outputChannel,
 		() => statusBarItem,
 		(c) => {
 			client = c;
