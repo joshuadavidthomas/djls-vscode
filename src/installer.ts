@@ -1,15 +1,21 @@
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 import * as fsPromises from "node:fs/promises";
 import * as https from "node:https";
 import * as path from "node:path";
 import { promisify } from "node:util";
 import type * as vscode from "vscode";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 const GITHUB_REPO = "joshuadavidthomas/django-language-server";
 const PACKAGE_NAME = "django-language-server";
 const EXECUTABLE_NAME = "djls";
+
+function getExecutableName(): string {
+	return process.platform === "win32"
+		? `${EXECUTABLE_NAME}.exe`
+		: EXECUTABLE_NAME;
+}
 
 interface GithubRelease {
 	tag_name: string;
@@ -79,10 +85,15 @@ function httpsGet(url: string): Promise<Buffer> {
 					if (
 						(res.statusCode === 301 ||
 							res.statusCode === 302 ||
-							res.statusCode === 307) &&
+							res.statusCode === 307 ||
+							res.statusCode === 308) &&
 						res.headers.location
 					) {
-						makeRequest(res.headers.location, redirectCount + 1);
+						const redirectUrl = new URL(
+							res.headers.location,
+							requestUrl,
+						).toString();
+						makeRequest(redirectUrl, redirectCount + 1);
 						return;
 					}
 
@@ -137,9 +148,7 @@ async function fetchLatestRelease(): Promise<GithubRelease> {
 }
 
 export function getInstalledServerPath(storagePath: string): string {
-	const execName =
-		process.platform === "win32" ? `${EXECUTABLE_NAME}.exe` : EXECUTABLE_NAME;
-	return path.join(storagePath, "server", execName);
+	return path.join(storagePath, "server", getExecutableName());
 }
 
 export async function checkInstalledServer(
@@ -189,11 +198,20 @@ export async function installServer(
 	await fsPromises.writeFile(archivePath, data);
 
 	outputChannel.appendLine("Extracting...");
-	await execAsync(`tar -xf "${archivePath}" -C "${storagePath}"`);
+	if (process.platform === "win32") {
+		await execFileAsync("powershell", [
+			"-NoProfile",
+			"-Command",
+			"Expand-Archive -LiteralPath $args[0] -DestinationPath $args[1] -Force",
+			archivePath,
+			storagePath,
+		]);
+	} else {
+		await execFileAsync("tar", ["-xf", archivePath, "-C", storagePath]);
+	}
 
 	const extractedDir = path.join(storagePath, baseName);
-	const execName =
-		process.platform === "win32" ? `${EXECUTABLE_NAME}.exe` : EXECUTABLE_NAME;
+	const execName = getExecutableName();
 	const extractedBinary = path.join(extractedDir, execName);
 	const finalBinary = getInstalledServerPath(storagePath);
 
