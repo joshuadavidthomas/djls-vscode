@@ -20,7 +20,7 @@ jobs:
   pre-commit:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
 
@@ -37,7 +37,7 @@ jobs:
           mkdir -p ~/.local/bin
           ln -sf $(which uv) ~/.local/bin/uv
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
         with:
           path: ~/.cache/pre-commit/
           key: pre-commit-1|${{ hashFiles('.pre-commit-config.yaml') }}
@@ -52,7 +52,7 @@ jobs:
     outputs:
       ts: ${{ steps.filter.outputs.ts }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
 
@@ -73,7 +73,7 @@ jobs:
     needs: ts-changes
     if: needs.ts-changes.outputs.ts == 'true'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
 
@@ -92,7 +92,7 @@ jobs:
     needs: ts-changes
     if: needs.ts-changes.outputs.ts == 'true'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
 
