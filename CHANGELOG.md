@@ -18,20 +18,29 @@ and this project attempts to adhere to [Semantic Versioning](https://semver.org/
 
 ## [Unreleased]
 
+## [0.2.0]
+
 ### Added
 
-- Initial release
-- Basic language server integration
-- Support for Django templates and Python files
-- Configuration options for server path and Django settings
 - Auto-install `djls` from GitHub releases when not found on PATH
 
 ### Fixed
 
 - Fixed binary name default on Windows — the `serverPath` setting now correctly defaults to `djls.exe` on Windows and `djls` on POSIX systems
 
+## [0.1.0]
+
+### Added
+
+- Initial release
+- Basic language server integration
+- Support for Django templates and Python files
+- Configuration options for server path and Django settings
+
 ### New Contributors
 
 - Josh Thomas <josh@joshthomas.dev> (maintainer)
 
-[unreleased]: https://github.com/joshuadavidthomas/djls-vscode/commits/main
+[unreleased]: https://github.com/joshuadavidthomas/djls-vscode/compare/v0.2.0...HEAD
+[0.1.0]: https://github.com/joshuadavidthomas/djls-vscode/releases/tag/v0.1.0
+[0.2.0]: https://github.com/joshuadavidthomas/djls-vscode/releases/tag/v0.2.0

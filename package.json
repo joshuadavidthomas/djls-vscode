@@ -2,7 +2,7 @@
 	"name": "django-language-server",
 	"displayName": "Django Language Server",
 	"description": "Visual Studio Code client for django-language-server",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"publisher": "djls",
 	"repository": {
 		"type": "git",
