@@ -171,48 +171,49 @@ async function resolveServerPath(
 		return installedPath;
 	}
 
-	// Offer to auto-install
-	const selection = await vscode.window.showInformationMessage(
-		"Django Language Server (djls) not found. Install it automatically?",
-		"Install",
-		"Installation Guide",
-		"Open Settings",
-	);
+	// Offer to auto-install without blocking extension activation.
+	void vscode.window
+		.showInformationMessage(
+			"Django Language Server (djls) not found. Install it automatically?",
+			"Install",
+			"Installation Guide",
+			"Open Settings",
+		)
+		.then(async (selection) => {
+			if (selection === "Install") {
+				try {
+					await vscode.window.withProgress(
+						{
+							location: vscode.ProgressLocation.Notification,
+							title: "Installing Django Language Server...",
+							cancellable: false,
+						},
+						() => installServer(storagePath, outputChannel),
+					);
+				} catch (error) {
+					outputChannel.appendLine(
+						`Failed to install Django Language Server: ${error}`,
+					);
+					vscode.window.showErrorMessage(
+						`Failed to install Django Language Server: ${error instanceof Error ? error.message : String(error)}`,
+					);
+				}
+				return;
+			}
 
-	if (selection === "Install") {
-		try {
-			const binaryPath = await vscode.window.withProgress(
-				{
-					location: vscode.ProgressLocation.Notification,
-					title: "Installing Django Language Server...",
-					cancellable: false,
-				},
-				() => installServer(storagePath, outputChannel),
-			);
-			return binaryPath;
-		} catch (error) {
-			outputChannel.appendLine(
-				`Failed to install Django Language Server: ${error}`,
-			);
-			vscode.window.showErrorMessage(
-				`Failed to install Django Language Server: ${error instanceof Error ? error.message : String(error)}`,
-			);
-			return undefined;
-		}
-	}
-
-	if (selection === "Installation Guide") {
-		vscode.env.openExternal(
-			vscode.Uri.parse(
-				"https://github.com/joshuadavidthomas/django-language-server/releases",
-			),
-		);
-	} else if (selection === "Open Settings") {
-		vscode.commands.executeCommand(
-			"workbench.action.openSettings",
-			"djls.serverPath",
-		);
-	}
+			if (selection === "Installation Guide") {
+				vscode.env.openExternal(
+					vscode.Uri.parse(
+						"https://github.com/joshuadavidthomas/django-language-server/releases",
+					),
+				);
+			} else if (selection === "Open Settings") {
+				vscode.commands.executeCommand(
+					"workbench.action.openSettings",
+					"djls.serverPath",
+				);
+			}
+		});
 
 	return undefined;
 }
