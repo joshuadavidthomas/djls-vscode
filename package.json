@@ -44,8 +44,7 @@
 			"properties": {
 				"djls.serverPath": {
 					"type": "string",
-					"default": "djls",
-					"description": "Path to the Django Language Server executable. Can be 'djls' if installed globally, or a full path like '/usr/local/bin/djls' or 'python -m djls'."
+					"description": "Path to the Django Language Server executable. Defaults to 'djls' on POSIX systems and 'djls.exe' on Windows. Can be a full path like '/usr/local/bin/djls'."
 				},
 				"djls.serverArgs": {
 					"type": "array",
