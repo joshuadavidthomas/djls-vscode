@@ -6,7 +6,8 @@ suite("Config Test Suite", () => {
 	test("getExtensionConfig returns default values", () => {
 		const config = getExtensionConfig();
 
-		assert.strictEqual(config.serverPath, "djls");
+		const expectedServer = process.platform === "win32" ? "djls.exe" : "djls";
+		assert.strictEqual(config.serverPath, expectedServer);
 		assert.deepStrictEqual(config.serverArgs, ["serve"]);
 		assert.strictEqual(config.traceServer, "off");
 		assert.strictEqual(config.debug, false);

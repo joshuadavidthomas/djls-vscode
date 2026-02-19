@@ -27,7 +27,7 @@ For configuring additional file types like `.html` files in templates directorie
 
 This extension contributes the following settings:
 
-* `djls.serverPath`: Path to the Django Language Server executable (default: `"djls"`)
+* `djls.serverPath`: Path to the Django Language Server executable (default: `"djls"` on POSIX, `"djls.exe"` on Windows)
 * `djls.serverArgs`: Arguments to pass to the Django Language Server command (default: `["serve"]`)
 * `djls.djangoSettingsModule`: Django settings module, e.g., `myproject.settings` (default: `""`, uses `DJANGO_SETTINGS_MODULE` env var)
 * `djls.venvPath`: Absolute path to virtual environment directory (default: `""`, auto-detects `.venv`, `venv`, `env`, `.env`, or `VIRTUAL_ENV`)
