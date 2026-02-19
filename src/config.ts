@@ -13,13 +13,8 @@ export interface ExtensionConfig {
 export function getExtensionConfig(): ExtensionConfig {
 	const config = vscode.workspace.getConfiguration("djls");
 
-	// Use platform-appropriate default for the django-language-server binary.
-	// On Windows the executable will usually be `djls.exe` while on POSIX
-	// systems it is typically `djls`.
-	const defaultServer = process.platform === "win32" ? "djls.exe" : "djls";
-
 	return {
-		serverPath: config.get<string>("serverPath", defaultServer),
+		serverPath: config.get<string>("serverPath", "djls"),
 		serverArgs: config.get<string[]>("serverArgs", ["serve"]),
 		djangoSettingsModule: config.get<string>("djangoSettingsModule", ""),
 		venvPath: config.get<string>("venvPath", ""),

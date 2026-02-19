@@ -1,4 +1,4 @@
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { promisify } from "node:util";
@@ -7,16 +7,51 @@ import {
 	LanguageClient,
 	type LanguageClientOptions,
 	type ServerOptions,
+	Trace,
 } from "vscode-languageclient/node";
 import type { ExtensionConfig } from "./config";
+import {
+	checkInstalledServer,
+	getInstalledServerPath,
+	installServer,
+} from "./installer";
 
 export async function checkServerAvailable(command: string): Promise<boolean> {
 	try {
-		await promisify(exec)(`${command} --version`);
+		const parsed = parseCommand(command);
+		if (!parsed) {
+			return false;
+		}
+
+		await promisify(execFile)(parsed.command, [...parsed.args, "--version"]);
 		return true;
 	} catch {
 		return false;
 	}
+}
+
+function parseCommand(
+	commandLine: string,
+): { command: string; args: string[] } | undefined {
+	const trimmed = commandLine.trim();
+	if (!trimmed) {
+		return undefined;
+	}
+
+	const tokens = trimmed.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
+	if (!tokens || tokens.length === 0) {
+		return undefined;
+	}
+
+	const [command, ...args] = tokens.map((token) =>
+		token.replace(/^(['"])(.*)\1$/, "$2"),
+	);
+
+	if (!command) {
+		return undefined;
+	}
+
+	return { command, args };
 }
 
 export async function findDjangoProjectRoot(
@@ -29,13 +64,16 @@ export async function findDjangoProjectRoot(
 	let currentDir = startPath;
 	const root = path.parse(currentDir).root;
 
-	while (currentDir !== root) {
+	while (true) {
 		const managePyPath = path.join(currentDir, "manage.py");
 
 		try {
 			await fs.access(managePyPath);
 			return currentDir;
 		} catch {
+			if (currentDir === root) {
+				break;
+			}
 			currentDir = path.dirname(currentDir);
 		}
 	}
@@ -46,13 +84,17 @@ export async function findDjangoProjectRoot(
 async function createServerOptions(
 	config: ExtensionConfig,
 ): Promise<ServerOptions> {
+	const parsedCommand = parseCommand(config.serverPath);
+	const command = parsedCommand?.command ?? config.serverPath;
+	const commandArgs = parsedCommand?.args ?? [];
+
 	const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 	const djangoRoot =
 		(await findDjangoProjectRoot(workspaceRoot)) || workspaceRoot;
 
 	return {
-		command: config.serverPath,
-		args: config.serverArgs,
+		command,
+		args: [...commandArgs, ...config.serverArgs],
 		options: {
 			cwd: djangoRoot,
 			env: {
@@ -89,35 +131,30 @@ function createClientOptions(config: ExtensionConfig): LanguageClientOptions {
 	};
 }
 
-export async function startLanguageServer(
-	outputChannel: vscode.OutputChannel,
+async function resolveServerPath(
 	config: ExtensionConfig,
-): Promise<LanguageClient | undefined> {
+	storagePath: string,
+	outputChannel: vscode.OutputChannel,
+): Promise<string | undefined> {
 	const isAvailable = await checkServerAvailable(config.serverPath);
-	if (!isAvailable) {
-		const message = `Django Language Server (djls) not found.
+	if (isAvailable) {
+		return config.serverPath;
+	}
 
-Install via:
-  • Releases: https://github.com/joshuadavidthomas/django-language-server/releases
-  • pip: pip install django-language-server
-  • uv: uv tool install django-language-server
+	// If the user explicitly configured a custom path, don't try auto-install
+	const isDefaultPath = config.serverPath === "djls";
 
-Or configure a custom path in settings.`;
-		outputChannel.appendLine(message);
+	if (!isDefaultPath) {
+		outputChannel.appendLine(
+			`Configured server path "${config.serverPath}" not found.`,
+		);
 		vscode.window
 			.showErrorMessage(
-				"Django Language Server (djls) not found.",
-				"Installation Guide",
+				`Django Language Server not found at "${config.serverPath}".`,
 				"Open Settings",
 			)
 			.then((selection) => {
-				if (selection === "Installation Guide") {
-					vscode.env.openExternal(
-						vscode.Uri.parse(
-							"https://github.com/joshuadavidthomas/django-language-server/releases",
-						),
-					);
-				} else if (selection === "Open Settings") {
+				if (selection === "Open Settings") {
 					vscode.commands.executeCommand(
 						"workbench.action.openSettings",
 						"djls.serverPath",
@@ -127,21 +164,92 @@ Or configure a custom path in settings.`;
 		return undefined;
 	}
 
-	const serverOptions = await createServerOptions(config);
-	const clientOptions = createClientOptions(config);
+	// Check for a previously auto-installed binary
+	if (await checkInstalledServer(storagePath)) {
+		const installedPath = getInstalledServerPath(storagePath);
+		outputChannel.appendLine(`Using auto-installed server at ${installedPath}`);
+		return installedPath;
+	}
 
-	const client = new LanguageClient(
-		"djls",
-		"Django Language Server",
-		serverOptions,
-		clientOptions,
+	// Offer to auto-install without blocking extension activation.
+	void vscode.window
+		.showInformationMessage(
+			"Django Language Server (djls) not found. Install it automatically?",
+			"Install",
+			"Installation Guide",
+			"Open Settings",
+		)
+		.then(async (selection) => {
+			if (selection === "Install") {
+				try {
+					await vscode.window.withProgress(
+						{
+							location: vscode.ProgressLocation.Notification,
+							title: "Installing Django Language Server...",
+							cancellable: false,
+						},
+						() => installServer(storagePath, outputChannel),
+					);
+				} catch (error) {
+					outputChannel.appendLine(
+						`Failed to install Django Language Server: ${error}`,
+					);
+					vscode.window.showErrorMessage(
+						`Failed to install Django Language Server: ${error instanceof Error ? error.message : String(error)}`,
+					);
+				}
+				return;
+			}
+
+			if (selection === "Installation Guide") {
+				vscode.env.openExternal(
+					vscode.Uri.parse(
+						"https://github.com/joshuadavidthomas/django-language-server/releases",
+					),
+				);
+			} else if (selection === "Open Settings") {
+				vscode.commands.executeCommand(
+					"workbench.action.openSettings",
+					"djls.serverPath",
+				);
+			}
+		});
+
+	return undefined;
+}
+
+export async function startLanguageServer(
+	outputChannel: vscode.OutputChannel,
+	config: ExtensionConfig,
+	storagePath: string,
+): Promise<LanguageClient | undefined> {
+	const serverPath = await resolveServerPath(
+		config,
+		storagePath,
+		outputChannel,
 	);
-
-	if (config.traceServer !== "off") {
-		client.setTrace(config.traceServer === "verbose" ? 2 : 1);
+	if (!serverPath) {
+		return undefined;
 	}
 
 	try {
+		const effectiveConfig = { ...config, serverPath };
+		const serverOptions = await createServerOptions(effectiveConfig);
+		const clientOptions = createClientOptions(effectiveConfig);
+
+		const client = new LanguageClient(
+			"djls",
+			"Django Language Server",
+			serverOptions,
+			clientOptions,
+		);
+
+		if (config.traceServer !== "off") {
+			client.setTrace(
+				config.traceServer === "verbose" ? Trace.Verbose : Trace.Messages,
+			);
+		}
+
 		await client.start();
 		outputChannel.appendLine("Django Language Server started successfully");
 		return client;

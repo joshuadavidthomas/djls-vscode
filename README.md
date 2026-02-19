@@ -4,9 +4,9 @@
 
 ## Requirements
 
-This extension requires the [Django Language Server (`djls`)](https://github.com/joshuadavidthomas/django-language-server) to be installed.
+This extension requires the [Django Language Server (`djls`)](https://github.com/joshuadavidthomas/django-language-server).
 
-For installation instructions, see the [djls documentation](https://djls.joshthomas.dev/en/latest/#installation).
+If `djls` is not found on your PATH, the extension will offer to download and install the latest release automatically. You can also install it manually — see the [djls documentation](https://djls.joshthomas.dev/en/latest/#installation) for instructions.
 
 ## Usage
 
@@ -120,10 +120,11 @@ This matches any file with `.dj.` in the name (e.g., `.dj.html`, `.dj.xml`, `.dj
 
 ### Language Server Not Starting
 
-1. Check that `djls` is installed: `pip show django-language-server`
-2. Verify the server path in settings
-3. Check the Output panel (View > Output) and select "Django Language Server" for error messages
-4. Enable trace logging: Set `djls.trace.server` to `"verbose"`
+1. If prompted, click "Install" to automatically download `djls`
+2. Or check that `djls` is installed manually: `pip show django-language-server`
+3. Verify the server path in settings
+4. Check the Output panel (View > Output) and select "Django Language Server" for error messages
+5. Enable trace logging: Set `djls.trace.server` to `"verbose"`
 
 ### No Auto-completion
 
