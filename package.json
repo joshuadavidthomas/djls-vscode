@@ -16,7 +16,7 @@
 		"lsp"
 	],
 	"engines": {
-		"vscode": "^1.103.0"
+		"vscode": "^1.109.0"
 	},
 	"categories": [
 		"Programming Languages"
