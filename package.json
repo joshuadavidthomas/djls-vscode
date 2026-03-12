@@ -74,7 +74,7 @@
 				"djls.venvPath": {
 					"type": "string",
 					"default": "",
-					"description": "Absolute path to your virtual environment directory. If not set, auto-detects .venv, venv, env, .env, or VIRTUAL_ENV."
+					"description": "Path to your virtual environment directory. If not set, the extension checks VIRTUAL_ENV, then scans the workspace for .venv, venv, env, and .env directories."
 				},
 				"djls.pythonPath": {
 					"type": "array",
