@@ -15,6 +15,7 @@ import {
 	getInstalledServerPath,
 	installServer,
 } from "./installer";
+import { findServerInVenv } from "./venv";
 
 export async function checkServerAvailable(command: string): Promise<boolean> {
 	try {
@@ -143,6 +144,22 @@ async function resolveServerPath(
 
 	// If the user explicitly configured a custom path, don't try auto-install
 	const isDefaultPath = config.serverPath === DEFAULT_SERVER_BINARY;
+
+	// Check for the server binary inside a virtual environment
+	if (isDefaultPath) {
+		const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+		const venvServerPath = await findServerInVenv(
+			DEFAULT_SERVER_BINARY,
+			workspaceRoot,
+			config.venvPath || undefined,
+		);
+		if (venvServerPath) {
+			outputChannel.appendLine(
+				`Found server in virtual environment: ${venvServerPath}`,
+			);
+			return venvServerPath;
+		}
+	}
 
 	if (!isDefaultPath) {
 		outputChannel.appendLine(

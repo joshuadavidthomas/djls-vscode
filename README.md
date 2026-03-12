@@ -6,7 +6,14 @@
 
 This extension requires the [Django Language Server (`djls`)](https://github.com/joshuadavidthomas/django-language-server).
 
-If `djls` is not found on your PATH, the extension will offer to download and install the latest release automatically. You can also install it manually — see the [djls documentation](https://djls.joshthomas.dev/en/latest/#installation) for instructions.
+The extension looks for `djls` in the following order:
+
+1. **PATH** — if `djls` is available as a command (e.g., globally installed or venv activated in the shell that launched VS Code)
+2. **Virtual environment** — checks the configured `djls.venvPath`, then `VIRTUAL_ENV`, then common venv directories (`.venv`, `venv`, `env`, `.env`) in the workspace root
+3. **Auto-installed binary** — a previously auto-installed copy in extension storage
+4. **Auto-install offer** — if none of the above are found, the extension offers to download and install the latest release from GitHub
+
+You can also install it manually — see the [djls documentation](https://djls.joshthomas.dev/en/latest/#installation) for instructions.
 
 ## Usage
 
@@ -30,7 +37,7 @@ This extension contributes the following settings:
 * `djls.serverPath`: Path to the Django Language Server executable (default: `"djls"` on POSIX, `"djls.exe"` on Windows)
 * `djls.serverArgs`: Arguments to pass to the Django Language Server command (default: `["serve"]`)
 * `djls.djangoSettingsModule`: Django settings module, e.g., `myproject.settings` (default: `""`, uses `DJANGO_SETTINGS_MODULE` env var)
-* `djls.venvPath`: Absolute path to virtual environment directory (default: `""`, auto-detects `.venv`, `venv`, `env`, `.env`, or `VIRTUAL_ENV`)
+* `djls.venvPath`: Path to virtual environment directory (default: `""`, checks `VIRTUAL_ENV` then scans for `.venv`, `venv`, `env`, `.env`)
 * `djls.pythonPath`: Additional Python paths to include in sys.path (default: `[]`)
 * `djls.debug`: Enable debug logging for troubleshooting (default: `false`)
 * `djls.trace.server`: Trace server communication for debugging (default: `"off"`)
@@ -120,11 +127,12 @@ This matches any file with `.dj.` in the name (e.g., `.dj.html`, `.dj.xml`, `.dj
 
 ### Language Server Not Starting
 
-1. If prompted, click "Install" to automatically download `djls`
-2. Or check that `djls` is installed manually: `pip show django-language-server`
-3. Verify the server path in settings
-4. Check the Output panel (View > Output) and select "Django Language Server" for error messages
-5. Enable trace logging: Set `djls.trace.server` to `"verbose"`
+1. If `djls` is installed in your project's virtual environment, make sure the venv is in the workspace root (`.venv`, `venv`, `env`, or `.env`) or set `djls.venvPath` to its location
+2. If prompted, click "Install" to automatically download `djls`
+3. Or check that `djls` is installed manually: `pip show django-language-server`
+4. Verify the server path in settings
+5. Check the Output panel (View > Output) and select "Django Language Server" for error messages
+6. Enable trace logging: Set `djls.trace.server` to `"verbose"`
 
 ### No Auto-completion
 

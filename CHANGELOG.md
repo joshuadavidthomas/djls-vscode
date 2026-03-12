@@ -18,6 +18,10 @@ and this project attempts to adhere to [Semantic Versioning](https://semver.org/
 
 ## [Unreleased]
 
+### Fixed
+
+- The extension now discovers `djls` installed inside virtual environments, checking the configured `venvPath`, `VIRTUAL_ENV`, and common venv directories (`.venv`, `venv`, `env`, `.env`) in the workspace root
+
 ## [0.2.0]
 
 ### Added
