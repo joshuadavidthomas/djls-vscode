@@ -18,3 +18,6 @@ vsc-extension-quickstart.md
 Justfile
 biome.json
 bun.lock
+test-fixtures/**
+wasm/**
+.vscode-test-web/**

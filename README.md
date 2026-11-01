@@ -15,6 +15,10 @@ The extension looks for `djls` in the following order:
 
 You can also install it manually — see the [djls documentation](https://djls.joshthomas.dev/en/latest/#installation) for instructions.
 
+### VS Code for the Web
+
+In [vscode.dev](https://vscode.dev) and [github.dev](https://github.dev), the extension runs django-language-server compiled to WebAssembly in a web worker, with no install. It bundles Django's source and reads the workspace's Python, template, and config files. Third-party packages named in `requirements*.txt` or `[project] dependencies` in `pyproject.toml` are downloaded from PyPI as pure-Python wheels into a virtual site-packages; add more with `djls.web.extraPackages`. Dependencies are not resolved, so name every package whose template tags you use. Packages without a pure-Python (`py3-none-any`) wheel are skipped with a warning.
+
 ## Usage
 
 The extension automatically activates when:
@@ -41,6 +45,7 @@ This extension contributes the following settings:
 * `djls.pythonPath`: Additional Python paths to include in sys.path (default: `[]`)
 * `djls.debug`: Enable debug logging for troubleshooting (default: `false`)
 * `djls.trace.server`: Trace server communication for debugging (default: `"off"`)
+* `djls.web.extraPackages`: VS Code for the Web only. Extra packages to install from PyPI, as `name` or `name==version` (default: `[]`)
 
 For more information about configuring the language server, see the [djls configuration documentation](https://djls.joshthomas.dev/en/latest/configuration/).
 

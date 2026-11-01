@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% load blog_tags widget_tweaks %}
+
+{% block content %}
+  {% recent_posts 3 %}
+  {% featured_post %}
+  {% render_field form.title class="input" %}
+{% endblock %}

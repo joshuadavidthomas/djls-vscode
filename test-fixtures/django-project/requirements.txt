@@ -1,0 +1,2 @@
+Django==5.2
+django-widget-tweaks  # templatetags: widget_tweaks
