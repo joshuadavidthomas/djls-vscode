@@ -30,6 +30,17 @@ export interface Wheel {
 	url: string;
 }
 
+/** A `none-any` wheel whose Python tag set includes py3, such as `py3` or `py2.py3`. */
+function isPurePython3(filename: string): boolean {
+	const [python, abi, platform] = filename
+		.replace(/\.whl$/, "")
+		.split("-")
+		.slice(-3);
+	return (
+		abi === "none" && platform === "any" && python.split(".").includes("py3")
+	);
+}
+
 /** The newest release with a pure-Python wheel, or the pinned one for `name==version`. */
 export async function resolveWheel(requirement: string): Promise<Wheel> {
 	const [name, pin] = requirement.split("==").map((part) => part.trim());
@@ -51,14 +62,13 @@ export async function resolveWheel(requirement: string): Promise<Wheel> {
 		);
 		const wheel = files.find(
 			(file) =>
-				file.packagetype === "bdist_wheel" &&
-				file.filename.endsWith("-py3-none-any.whl"),
+				file.packagetype === "bdist_wheel" && isPurePython3(file.filename),
 		);
 		if (wheel) return { filename: wheel.filename, version, url: wheel.url };
 	}
 	const all = Object.values(project.releases).flat();
 	if (all.some((file) => file.packagetype === "bdist_wheel")) {
-		throw new Error(`${name} publishes no pure-Python (py3-none-any) wheel`);
+		throw new Error(`${name} publishes no pure-Python (py3, none-any) wheel`);
 	}
 	throw new Error(`${name} publishes only an sdist, no wheel`);
 }
@@ -74,7 +84,7 @@ async function inflateRaw(bytes: Uint8Array<ArrayBuffer>) {
  * A minimal zip reader: end-of-central-directory, then the central directory, then each local
  * header. Handles stored (0) and deflated (8) entries, which is all wheels use. No zip64.
  */
-async function* zipEntries(buffer: Uint8Array<ArrayBuffer>) {
+export async function* zipEntries(buffer: Uint8Array<ArrayBuffer>) {
 	const view = new DataView(
 		buffer.buffer,
 		buffer.byteOffset,

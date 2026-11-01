@@ -17,6 +17,7 @@ import {
 	parsePyprojectDependencies,
 	parseRequirementsTxt,
 } from "./requirements";
+import { SOURCE_SCHEME, VirtualSources } from "./sources";
 import {
 	collectWorkspaceFiles,
 	isSkippedPath,
@@ -28,6 +29,8 @@ import {
 
 // Downloaded packages, kept across server restarts in this window.
 const packageCache = new Map<string, Promise<Map<string, string>>>();
+// Read-only documents for definitions in installed packages and bundled Django.
+let sources: VirtualSources | undefined;
 
 function documentSelector(): DocumentSelector {
 	const schemes = [
@@ -60,12 +63,39 @@ function serverSettings(config: ExtensionConfig) {
 	};
 }
 
-function createClientOptions(config: ExtensionConfig): LanguageClientOptions {
+function toVirtual<T extends vscode.Location | vscode.LocationLink>(
+	location: T,
+	sources: VirtualSources,
+): T {
+	const root = vscode.workspace.workspaceFolders?.[0]?.uri;
+	if (!root) return location;
+	if ("targetUri" in location) {
+		const targetUri = sources.toVirtual(location.targetUri, root);
+		return targetUri ? { ...location, targetUri } : location;
+	}
+	const uri = sources.toVirtual(location.uri, root);
+	return (uri ? new vscode.Location(uri, location.range) : location) as T;
+}
+
+function createClientOptions(
+	config: ExtensionConfig,
+	sources: VirtualSources,
+): LanguageClientOptions {
 	// No `synchronize.configurationSection`: it would send VS Code's `{ djls: {...} }`
 	// section, while djls-wasm takes changed settings in the initializationOptions shape.
 	return {
 		documentSelector: documentSelector(),
 		initializationOptions: serverSettings(config),
+		middleware: {
+			async provideDefinition(document, position, token, next) {
+				const result = await next(document, position, token);
+				if (!result) return result;
+				if (!Array.isArray(result)) return toVirtual(result, sources);
+				return (result as (vscode.Location | vscode.LocationLink)[]).map(
+					(location) => toVirtual(location, sources),
+				) as vscode.Location[] | vscode.LocationLink[];
+			},
+		},
 	};
 }
 
@@ -98,7 +128,12 @@ function workspaceRequirements(folder: vscode.Uri, files: SyncedFile[]) {
 function installPackage(requirement: string) {
 	let files = packageCache.get(requirement);
 	if (!files) {
-		files = resolveWheel(requirement).then(unpackWheel);
+		files = resolveWheel(requirement)
+			.then(unpackWheel)
+			.then((unpacked) => {
+				sources?.addPackageFiles(unpacked);
+				return unpacked;
+			});
 		packageCache.set(requirement, files);
 		files.catch(() => packageCache.delete(requirement));
 	}
@@ -223,6 +258,15 @@ export async function startLanguageServer(
 	context: vscode.ExtensionContext,
 ): Promise<LanguageClient | undefined> {
 	const dist = vscode.Uri.joinPath(context.extensionUri, "dist", "browser");
+	if (!sources) {
+		sources = new VirtualSources(vscode.Uri.joinPath(dist, "django.zip"));
+		context.subscriptions.push(
+			vscode.workspace.registerTextDocumentContentProvider(
+				SOURCE_SCHEME,
+				sources,
+			),
+		);
+	}
 	try {
 		const worker = new Worker(
 			vscode.Uri.joinPath(dist, "worker.js").toString(true),
@@ -239,7 +283,7 @@ export async function startLanguageServer(
 		const client = new LanguageClient(
 			"djls",
 			"Django Language Server",
-			createClientOptions(config),
+			createClientOptions(config, sources),
 			worker,
 		);
 		// The client never ends the worker itself, and a restart starts a new one. End it once

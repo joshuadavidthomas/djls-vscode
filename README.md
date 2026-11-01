@@ -17,7 +17,7 @@ You can also install it manually — see the [djls documentation](https://djls.j
 
 ### VS Code for the Web
 
-In [vscode.dev](https://vscode.dev) and [github.dev](https://github.dev), the extension runs django-language-server compiled to WebAssembly in a web worker, with no install. It bundles Django's source and reads the workspace's Python, template, and config files. Third-party packages named in `requirements*.txt` or `[project] dependencies` in `pyproject.toml` are downloaded from PyPI as pure-Python wheels into a virtual site-packages; add more with `djls.web.extraPackages`. Dependencies are not resolved, so name every package whose template tags you use. Packages without a pure-Python (`py3-none-any`) wheel are skipped with a warning.
+In [vscode.dev](https://vscode.dev) and [github.dev](https://github.dev), the extension runs django-language-server compiled to WebAssembly in a web worker, with no install. It bundles Django 5.2's source and reads the workspace's Python, template, and config files. Third-party packages named in `requirements*.txt`, `requirements/*.txt`, or `[project] dependencies` in `pyproject.toml` are downloaded from PyPI as pure-Python wheels into a virtual site-packages; add more with `djls.web.extraPackages`. Dependencies are not resolved, so name every package whose template tags you use. Packages without a pure-Python (`none-any`) wheel are skipped with a warning; a direct reference such as `pkg @ git+https://...` installs the newest `pkg` release from PyPI. When the project pins another Django release (`django==6.1.1`), that release is installed from PyPI too. Go to Definition into installed packages or the bundled Django opens a read-only copy.
 
 ## Usage
 

@@ -49,3 +49,5 @@ The `browser` entry (`src/browser/`) runs djls-wasm in a web worker. Put the was
 # Opens test-fixtures/django-project in VS Code for the Web on http://localhost:3000
 bun run test:web
 ```
+
+To try the extension in vscode.dev itself, serve the repository root over `http://localhost` (vscode.dev's Content Security Policy allows `localhost` but not arbitrary hosts) with `Access-Control-Allow-Origin: *`, then run **Developer: Install Extension from Location...** with that URL.
