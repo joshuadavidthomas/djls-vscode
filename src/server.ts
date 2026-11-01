@@ -9,7 +9,11 @@ import {
 	type ServerOptions,
 	Trace,
 } from "vscode-languageclient/node";
-import { DEFAULT_SERVER_BINARY, type ExtensionConfig } from "./config";
+import {
+	DEFAULT_SERVER_BINARY,
+	type ExtensionConfig,
+	initializationOptions,
+} from "./config";
 import {
 	checkInstalledServer,
 	getInstalledServerPath,
@@ -123,12 +127,7 @@ function createClientOptions(config: ExtensionConfig): LanguageClientOptions {
 				vscode.workspace.createFileSystemWatcher("**/*.djhtml"),
 			],
 		},
-		initializationOptions: {
-			django_settings_module: config.djangoSettingsModule || undefined,
-			venv_path: config.venvPath || undefined,
-			python_path: config.pythonPath.length > 0 ? config.pythonPath : undefined,
-			debug: config.debug,
-		},
+		initializationOptions: initializationOptions(config),
 	};
 }
 

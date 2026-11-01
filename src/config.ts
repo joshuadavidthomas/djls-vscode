@@ -33,3 +33,12 @@ export function hasDjangoSettings(): boolean {
 	const config = getExtensionConfig();
 	return !!(process.env.DJANGO_SETTINGS_MODULE || config.djangoSettingsModule);
 }
+
+export function initializationOptions(config: ExtensionConfig) {
+	return {
+		django_settings_module: config.djangoSettingsModule || undefined,
+		venv_path: config.venvPath || undefined,
+		python_path: config.pythonPath.length > 0 ? config.pythonPath : undefined,
+		debug: config.debug,
+	};
+}
