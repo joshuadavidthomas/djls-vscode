@@ -21,3 +21,4 @@ bun.lock
 test-fixtures/**
 wasm/**
 .vscode-test-web/**
+scripts/**

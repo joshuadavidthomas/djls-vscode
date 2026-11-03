@@ -121,6 +121,7 @@
 		"vscode:prepublish": "bun run package",
 		"build:vsix": "vsce package --no-dependencies",
 		"compile": "bun run check-types && bun run lint && node esbuild.js",
+		"fetch-wasm": "node scripts/fetch-wasm.mjs",
 		"watch": "npm-run-all -p watch:*",
 		"watch:esbuild": "node esbuild.js --watch",
 		"watch:tsc": "tsc --noEmit --watch --project tsconfig.json",

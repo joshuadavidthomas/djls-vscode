@@ -5,8 +5,9 @@ import { context } from "esbuild";
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
 
-// The wasm-bindgen `--target web` output of djls-wasm and a stored Django zip. When they are
-// missing, the browser build uses a stub server so the extension still loads.
+// The wasm-bindgen `--target web` output of djls-wasm and a stored Django zip, filled by
+// `bun run fetch-wasm`. When they are missing, development builds use a stub server so the
+// extension still loads; production builds fail.
 const WASM_DIR = 'wasm';
 const hasWasm = existsSync(`${WASM_DIR}/djls_wasm.js`);
 
@@ -68,6 +69,11 @@ const shared = {
 };
 
 async function main() {
+  if (production && !hasWasm) {
+    throw new Error(
+      `${WASM_DIR}/djls_wasm.js not found; run \`bun run fetch-wasm\` so the package ships the real server, not the stub`,
+    );
+  }
   if (!hasWasm) {
     console.warn(`${WASM_DIR}/djls_wasm.js not found; the browser build uses the stub server`);
   }
