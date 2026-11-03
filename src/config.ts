@@ -1,9 +1,16 @@
 import * as vscode from "vscode";
 
+// The browser bundle has no `process`, so read it through `globalThis` there.
+const nodeProcess = (
+	globalThis as {
+		process?: { platform: string; env: Record<string, string | undefined> };
+	}
+).process;
+
 // Platform-appropriate name for the django-language-server binary.
 // On Windows the executable will be `djls.exe`, on POSIX systems `djls`.
 export const DEFAULT_SERVER_BINARY =
-	process.platform === "win32" ? "djls.exe" : "djls";
+	nodeProcess?.platform === "win32" ? "djls.exe" : "djls";
 
 export interface ExtensionConfig {
 	serverPath: string;
@@ -13,6 +20,7 @@ export interface ExtensionConfig {
 	pythonPath: string[];
 	debug: boolean;
 	traceServer: string;
+	extraPackages: string[];
 }
 
 export function getExtensionConfig(): ExtensionConfig {
@@ -26,10 +34,22 @@ export function getExtensionConfig(): ExtensionConfig {
 		pythonPath: config.get<string[]>("pythonPath", []),
 		debug: config.get<boolean>("debug", false),
 		traceServer: config.get<string>("trace.server", "off"),
+		extraPackages: config.get<string[]>("web.extraPackages", []),
 	};
 }
 
 export function hasDjangoSettings(): boolean {
 	const config = getExtensionConfig();
-	return !!(process.env.DJANGO_SETTINGS_MODULE || config.djangoSettingsModule);
+	return !!(
+		nodeProcess?.env.DJANGO_SETTINGS_MODULE || config.djangoSettingsModule
+	);
+}
+
+export function initializationOptions(config: ExtensionConfig) {
+	return {
+		django_settings_module: config.djangoSettingsModule || undefined,
+		venv_path: config.venvPath || undefined,
+		python_path: config.pythonPath.length > 0 ? config.pythonPath : undefined,
+		debug: config.debug,
+	};
 }

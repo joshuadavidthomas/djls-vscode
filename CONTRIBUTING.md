@@ -40,3 +40,14 @@ just test
 # macOS doesn't require xvfb
 bun run test
 ```
+
+### VS Code for the Web
+
+The `browser` entry (`src/browser/`) runs djls-wasm in a web worker. Put the wasm-bindgen `--target web` output of django-language-server's `djls-wasm` crate (`djls_wasm.js`, `djls_wasm_bg.wasm`) and a stored Django zip named `django.zip` in `wasm/`; the build copies them into `dist/browser/`. Without `wasm/djls_wasm.js`, the build uses a stub server (`src/browser/stub/`) that recognizes a few tags, which is enough to exercise the plumbing.
+
+```bash
+# Opens test-fixtures/django-project in VS Code for the Web on http://localhost:3000
+bun run test:web
+```
+
+To try the extension in vscode.dev itself, serve the repository root over `http://localhost` (vscode.dev's Content Security Policy allows `localhost` but not arbitrary hosts) with `Access-Control-Allow-Origin: *`, then run **Developer: Install Extension from Location...** with that URL.

@@ -27,6 +27,7 @@
 		"workspaceContains:**/manage.py"
 	],
 	"main": "./dist/extension.js",
+	"browser": "./dist/browser/extension.js",
 	"contributes": {
 		"commands": [
 			{
@@ -88,6 +89,14 @@
 					"type": "boolean",
 					"default": false,
 					"description": "Enable debug logging for troubleshooting language server issues."
+				},
+				"djls.web.extraPackages": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"default": [],
+					"description": "VS Code for the Web only: extra packages to install from PyPI into the virtual site-packages, as `name` or `name==version`. Added to the packages named in the workspace's requirements files and pyproject.toml dependencies. Only pure-Python wheels are supported, and dependencies are not resolved, so list each package you need."
 				}
 			}
 		},
@@ -112,6 +121,7 @@
 		"vscode:prepublish": "bun run package",
 		"build:vsix": "vsce package --no-dependencies",
 		"compile": "bun run check-types && bun run lint && node esbuild.js",
+		"fetch-wasm": "node scripts/fetch-wasm.mjs",
 		"watch": "npm-run-all -p watch:*",
 		"watch:esbuild": "node esbuild.js --watch",
 		"watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
@@ -122,7 +132,8 @@
 		"check-types": "tsc --noEmit",
 		"format": "biome check --write src",
 		"lint": "biome check src",
-		"test": "vscode-test"
+		"test": "vscode-test",
+		"test:web": "node esbuild.js && vscode-test-web --browser=chromium --extensionDevelopmentPath=. test-fixtures/django-project"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.4",
@@ -131,12 +142,14 @@
 		"@types/vscode": "^1.109.0",
 		"@vscode/test-cli": "^0.0.12",
 		"@vscode/test-electron": "^2.5.2",
+		"@vscode/test-web": "^0.0.81",
 		"@vscode/vsce": "^3.7.1",
 		"esbuild": "^0.27.3",
 		"npm-run-all": "^4.1.5",
 		"typescript": "^5.9.3"
 	},
 	"dependencies": {
+		"vscode-jsonrpc": "^8.2.0",
 		"vscode-languageclient": "^9.0.1"
 	}
 }
